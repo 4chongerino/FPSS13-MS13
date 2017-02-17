@@ -6,6 +6,7 @@
 	var/id = 0.0
 	var/obj/master
 
+
 /obj/screen/text
 	icon = null
 	icon_state = null

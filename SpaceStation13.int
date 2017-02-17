@@ -1,6 +1,11 @@
 // BEGIN_INTERNALS
 /*
 MAP_ICON_TYPE: 0
+WINDOW: code\modules\achievements\achievement_procs.dm;code\modules\tooltips\tooltip.dm;code\modules\client\client procs.dm;interface\skin.dmf;code\modules\mob\living\carbon\human\hud.dm;code\modules\mob\screen.dm;code\modules\mob\living\carbon\human\human.dm;code\__HELPERS\unsorted.dm;code\modules\mob\mob_helpers.dm;code\modules\progbar\progbar.dm;code\__HELPERS\game.dm;code\setup.dm;code\modules\mob\inventory.dm;code\modules\mob\mob_defines.dm;code\names.dm;code\hub.dm;code\global.dm
+LAST_COMPILE_VERSION: 505.1235
+DIR: code code\__HELPERS code\modules code\modules\achievements code\modules\client code\modules\mob code\modules\mob\dead code\modules\mob\dead\observer code\modules\mob\living code\modules\mob\living\carbon code\modules\mob\living\carbon\human code\modules\progbar code\modules\tooltips 
+FILE: code\modules\progbar\progbar.dm
+LAST_COMPILE_TIME: 1487288037
 AUTO_FILE_DIR: ON
 */
 // END_INTERNALS

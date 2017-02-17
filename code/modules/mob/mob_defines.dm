@@ -25,6 +25,7 @@
 	var/obj/screen/pressure = null			//External Pressure
 	var/obj/screen/damageoverlay = null		//Redscreen
 
+	var/list/progressbars = null
 
 	var/computer_id = null
 
@@ -39,6 +40,8 @@
 	var/obj/screen/zone_sel/zone_sel = null
 
 	var/damageoverlaytemp = 0
+
+	var/active_hand_index = 1
 
 	var/lastattacker = null
 	var/lastattacked = null

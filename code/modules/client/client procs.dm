@@ -83,7 +83,9 @@
 	//CONNECT//
 	///////////
 /client/New(TopicData)
-	TopicData = null							//Prevent calls to client.Topic from connect
+	TopicData = null //Prevent calls to client.Topic from connect
+	src.tooltips = new /datum/tooltip(src)
+
 
 	if(connection != "seeker")					//Invalid connection type.
 		return null

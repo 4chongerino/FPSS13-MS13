@@ -4,6 +4,10 @@
 
 #define NEWMAP
 
+#define LAZYINITLIST(L) if (!L) L = list()
+
+#define LAZYREMOVE(L, I) if(L) { L -= I; if(!L.len) { L = null; } }
+
 #define PI 3.1415
 
 #define R_IDEAL_GAS_EQUATION	8.31 //kPa*L/(K*mol)

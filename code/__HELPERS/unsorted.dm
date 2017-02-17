@@ -4,6 +4,8 @@
  * A large number of misc global procs.
  */
 
+#define isliving(A) (istype(A, /mob/living))
+
 //Returns the middle-most value
 /proc/dd_range(var/low, var/high, var/num)
 	return max(low,min(high,num))
@@ -687,44 +689,113 @@ proc/anim(turf/location as turf,target as mob|obj,a_icon,a_icon_state as text,fl
 
 	else return get_step(ref, base_dir)
 
-/proc/do_mob(var/mob/user , var/mob/target, var/time = 30) //This is quite an ugly solution but i refuse to use the old request system.
-	if(!user || !target) return 0
+/proc/do_mob(mob/user , mob/target, time = 30, uninterruptible = 0, progress = 1, datum/callback/extra_checks = null)
+	if(!user || !target)
+		return 0
 	var/user_loc = user.loc
+
+	var/drifting = 0
+	if(!user.Process_Spacemove(0) && user.inertia_dir)
+		drifting = 1
+
 	var/target_loc = target.loc
+
 	var/holding = user.get_active_hand()
-	sleep(time)
-	if(!user || !target) return 0
-	if ( user.loc == user_loc && target.loc == target_loc && user.get_active_hand() == holding && !( user.stat ) && (!user.weakened && !user.paralysis && !user.lying) )
-		return 1
-	else
-		return 0
+	var/datum/progressbar/progbar
+	if (progress)
+		progbar = new(user, time, target)
 
-/proc/do_after(var/mob/user as mob, delay as num, var/numticks = 5, var/needhand = 1)
-	if(!user || isnull(user))
-		return 0
-	if(numticks == 0)
-		return 0
+	var/endtime = world.time+time
+	var/starttime = world.time
+	. = 1
+	while (world.time < endtime)
 
-	var/delayfraction = round(delay/numticks)
-	var/turf/T = user.loc
+		if (progress)
+			progbar.update(world.time - starttime)
+		if(!user || !target)
+			. = 0
+			break
+		if(uninterruptible)
+			continue
+
+		if(drifting && !user.inertia_dir)
+			drifting = 0
+			user_loc = user.loc
+
+		if((!drifting && user.loc != user_loc) || target.loc != target_loc || user.get_active_hand() != holding || user.lying)
+			. = 0
+			break
+	if (progress)
+		qdel(progbar)
+
+/proc/do_after(mob/user, delay, needhand = 1, atom/target = null, progress = 1, datum/callback/extra_checks = null)
+	if(!user)
+		return 0
+	var/atom/Tloc = null
+	if(target)
+		Tloc = target.loc
+
+	var/atom/Uloc = user.loc
+
+	var/drifting = 0
+	if(!user.Process_Spacemove(0) && user.inertia_dir)
+		drifting = 1
+
 	var/holding = user.get_active_hand()
 
-	for(var/i = 0, i<numticks, i++)
-		sleep(delayfraction)
+	var/holdingnull = 1 //User's hand started out empty, check for an empty hand
+	if(holding)
+		holdingnull = 0 //Users hand started holding something, check to see if it's still holding that
 
+	var/datum/progressbar/progbar
+	if (progress)
+		progbar = new(user, delay, target)
 
-		if(!user || user.stat || user.weakened || user.stunned || !(user.loc == T))
-			return 0
-		if(needhand && !(user.get_active_hand() == holding))	//Sometimes you don't want the user to have to keep their active hand
-			return 0
+	var/endtime = world.time + delay
+	var/starttime = world.time
+	. = 1
+	while (world.time < endtime)
 
-	return 1
+		if (progress)
+			progbar.update(world.time - starttime)
+
+		if(drifting && !user.inertia_dir)
+			drifting = 0
+			Uloc = user.loc
+
+		if(!user || user.stat || user.weakened || user.stunned  || (!drifting && user.loc != Uloc))
+			. = 0
+			break
+
+		if(Tloc && (!target || Tloc != target.loc))
+			if((Uloc != Tloc || Tloc != user) && !drifting)
+				. = 0
+				break
+
+		if(needhand)
+			//This might seem like an odd check, but you can still need a hand even when it's empty
+			//i.e the hand is used to pull some item/tool out of the construction
+			if(!holdingnull)
+				if(!holding)
+					. = 0
+					break
+			if(user.get_active_hand() != holding)
+				. = 0
+				break
+	if (progress)
+		qdel(progbar)
 
 //Takes: Anything that could possibly have variables and a varname to check.
 //Returns: 1 if found, 0 if not.
 /proc/hasvar(var/datum/A, var/varname)
 	if(A.vars.Find(lowertext(varname))) return 1
 	else return 0
+
+/proc/qdel(var/datum/thing)
+	thing.Destroy()
+
+/datum/proc/Destroy()
+	del(src)
 
 //Returns: all the areas in the world
 /proc/return_areas()
